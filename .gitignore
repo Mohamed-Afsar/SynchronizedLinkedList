@@ -1,0 +1,39 @@
+# Source - https://stackoverflow.com/a/35065359
+
+# Mac OS X Finder
+.DS_Store
+
+# Private Keys
+*.pem
+
+# Xcode legacy
+*.mode1
+*.mode1v3
+*.mode2v3
+*.perspective
+*.perspectivev3
+*.pbxuser
+
+# Xcode
+xcuserdata/
+DerivedData/
+
+# build products
+*.[oa]
+
+# repositories
+.hg
+.svn
+CVS
+
+# automatic backup files
+*~.nib
+*.swp
+*~
+*(Autosaved).rtfd/
+Backup[ ]of[ ]*.pages/
+Backup[ ]of[ ]*.key/
+Backup[ ]of[ ]*.numbers/
+
+# Cocoapods
+Pods/
