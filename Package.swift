@@ -14,7 +14,7 @@ let package = Package(
     dependencies: [
         .package(url: "https://github.com/Mohamed-Afsar/DoublyLinkedList.git",
         .exact("1.0.0"))
-//    .package(path: "../DoublyLinkedList")
+//        .package(path: "../DoublyLinkedList")
     ],
     targets: [
         // Targets are the basic building blocks of a package. A target can define a module or a test suite.

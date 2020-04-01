@@ -92,6 +92,7 @@ final class SynchronizedLinkedListTests: XCTestCase {
         list.printAllKeys()
         print("Reversed")
         list.printAllKeys(reversed: true)
+
         XCTAssertEqual(list.count, 8)
 
         // Index
@@ -117,10 +118,17 @@ final class SynchronizedLinkedListTests: XCTestCase {
         XCTAssertEqual(list[6], nil)
         
         // Subscript Set
-        list[6] = six
-        XCTAssertEqual(list[6], six)
-        list.remove(six)
+        list[5] = six
+        XCTAssertEqual(list[5], six)
         
+        // Replace
+        list.replace(at: 5, five)
+        XCTAssertEqual(list.find(at: 5), five)
+        list.replace(at: 0, six)
+        XCTAssertEqual(list[0], six)
+        list[0] = zero
+        XCTAssertEqual(list[0], zero)
+
         // Append
         list.append(six)
         XCTAssertEqual(list.count, 7)
@@ -207,7 +215,7 @@ final class SynchronizedLinkedListTests: XCTestCase {
                 var i = 0
                 while i < 100 {
                     list.remove(at: 2)
-                    list.find(at: 2)
+                    let _ = list.find(at: 2)
                     list.append("Hello")
                     list.insert("Inserted", at: 5)
                     i += 1

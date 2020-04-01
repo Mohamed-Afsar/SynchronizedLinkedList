@@ -72,9 +72,16 @@ class ViewController: UIViewController {
         print("list[6]: \(String(describing: list[6]))")
         
         // Subscript Set
-        list[6] = six
-        print("list[6]: \(String(describing: list[6]))")
-        list.remove(six)
+        list[5] = six
+        print("list[5] == six: \(list[5] == six)")
+        
+        // Replace
+        list.replace(at: 5, five)
+        print("list.find(at: 5) == five: \(list.find(at: 5) == five)")
+        list.replace(at: 0, six)
+        print("list[0] == six: \(list[0] == six)")
+        list[0] = zero
+        print("list[0] == zero: \(list[0] == zero)")
         
         // Append
         list.append("six")

@@ -11,39 +11,13 @@ import DoublyLinkedList
 
 open class SynchronizedLinkedList<T: Equatable>: DoublyLinkedList<T> {
     // MARK: Open IVars
-    open override var first: T? {
-        var result: T?
-        self.cQueue.sync { [weak self] in result = self?.superFirst() }
-        return result
-    }
-    open override var last: T? {
-        var result: T?
-        self.cQueue.sync { [weak self] in result = self?.superLast() }
-        return result
-    }
-    open override var count: Int {
-        var result = 0
-        self.cQueue.sync { [weak self] in
-            result = self?.superCount() ?? 0
-        }
-        return result
-    }
-    open override var isEmpty: Bool {
-        var result = false
-        self.cQueue.sync { [weak self] in
-            result = self?.superIsEmpty() ?? false
-        }
-        return result
-    }
+    open override var first: T? { self._first }
+    open override var last: T? { self._last }
+    open override var count: Int { self._count }
+    open override var isEmpty: Bool { self._isEmpty }
 
     // CustomStringConvertible
-    open override var description: String {
-        var result = ""
-        self.cQueue.sync { [weak self] in
-            result = self?.superDescription() ?? ""
-        }
-        return result
-    }
+    open override var description: String { self._description }
     
     // MARK: Private ICons
     private let cQueue: DispatchQueue = {
@@ -58,64 +32,184 @@ open class SynchronizedLinkedList<T: Equatable>: DoublyLinkedList<T> {
     
     required public convenience init(arrayLiteral elements: T...) {
         self.init()
-        self.append(elements)
+        self._append(elements)
     }
     
     public convenience init(_ element: T) {
         self.init()
-        self.append(element)
+        self._append(element)
     }
     
     public convenience init(_ elements: [T]) {
         self.init()
-        self.append(elements)
+        self._append(elements)
     }
     
     // MARK: Open Manipulating Functions
     open override func append(_ elements: [T]) {
-        self.cQueue.async(flags: .barrier) { [weak self] in self?.superAppend(elements) }
+        self._append(elements)
     }
     
     open override func append(_ element: T) {
-        self.cQueue.async(flags: .barrier) { [weak self] in self?.superAppend(element) }
+        self._append(element)
     }
     
     open override func prepend(_ elements: [T]) {
-        self.cQueue.async(flags: .barrier) { [weak self] in self?.superPrepend(elements) }
+        self._prepend(elements)
     }
     
     open override func prepend(_ element: T) {
-        self.cQueue.async(flags: .barrier) { [weak self] in self?.superPrepend(element) }
+        self._prepend(element)
+    }
+    
+    open override func replace(at idx: Int, _ element: T) {
+        self._replace(at: idx, element)
     }
     
     open override func insert(_ element: T, at idx: Int) {
+        self._insert(element, at: idx)
+    }
+        
+    open override func removeAll() {
+        self._removeAll()
+    }
+    
+    open override func removeFirst() {
+        self._removeFirst()
+    }
+    
+    open override func removeLast() {
+        self._removeLast()
+    }
+    
+    open override func remove(_ element: T) {
+        self._remove(element)
+    }
+    
+    open override func remove(at idx: Int) {
+        self._remove(at: idx)
+    }
+    
+    // MARK: Open Reading Functions
+    open override func index(_ element: T) -> Int? {
+        self._index(element)
+    }
+    
+    open override subscript(idx: Int) -> T? {
+        get {
+            self._getSubscript(idx: idx)
+        }
+        set {
+            guard let newValue = newValue else { return }
+            self._setSubscript(idx: idx, newValue)
+        }
+    }
+    
+    open override func find(at idx: Int) -> T? {
+        self._find(at: idx)
+    }
+    
+    open override func forEach(reversed: Bool = false, _ body: ((T) -> Void)) {
+        self._forEach(reversed: reversed, body)
+    }
+    
+    open override func enumerateObjects(reversed: Bool = false, _ body: ((_ obj: T, _ idx: Int, _ stop: inout Bool) -> Void)) {
+        self._enumerateObjects(reversed: reversed, body)
+    }
+
+    open override func printAllKeys(reversed: Bool = false) {
+        self._printAllKeys(reversed: reversed)
+    }
+}
+
+// MARK: Private Helper Functions
+private extension SynchronizedLinkedList {
+    // This `[weak self]` thingy in the blocks is to prevent crashes caused by asynchronous execution of the Queue even after the object gets deallocated.
+    
+    // MARK: Private IVars
+    var _first: T? {
+        var result: T?
+        self.cQueue.sync { [weak self] in result = self?.superFirst() }
+        return result
+    }
+    var _last: T? {
+        var result: T?
+        self.cQueue.sync { [weak self] in result = self?.superLast() }
+        return result
+    }
+    var _count: Int {
+        var result = 0
+        self.cQueue.sync { [weak self] in
+            result = self?.superCount() ?? 0
+        }
+        return result
+    }
+    var _isEmpty: Bool {
+        var result = false
+        self.cQueue.sync { [weak self] in
+            result = self?.superIsEmpty() ?? false
+        }
+        return result
+    }
+
+    // CustomStringConvertible
+    var _description: String {
+        var result = ""
+        self.cQueue.sync { [weak self] in
+            result = self?.superDescription() ?? ""
+        }
+        return result
+    }
+        
+    // MARK: Open Manipulating Functions
+    func _append(_ elements: [T]) {
+        self.cQueue.async(flags: .barrier) { [weak self] in self?.superAppend(elements) }
+    }
+    
+    func _append(_ element: T) {
+        self.cQueue.async(flags: .barrier) { [weak self] in self?.superAppend(element) }
+    }
+    
+    func _prepend(_ elements: [T]) {
+        self.cQueue.async(flags: .barrier) { [weak self] in self?.superPrepend(elements) }
+    }
+    
+    func _prepend(_ element: T) {
+        self.cQueue.async(flags: .barrier) { [weak self] in self?.superPrepend(element) }
+    }
+    
+    func _replace(at idx: Int, _ element: T) {
+        self.cQueue.async(flags: .barrier) { [weak self] in self?.superReplace(at: idx, element) }
+    }
+    
+    func _insert(_ element: T, at idx: Int) {
         self.cQueue.async(flags: .barrier) { [weak self] in
             self?.superInsert(element, at: idx)
         }
     }
         
-    open override func removeAll() {
+    func _removeAll() {
         self.cQueue.async(flags: .barrier) { [weak self] in self?.superRemoveAll() }
     }
     
-    open override func removeFirst() {
+    func _removeFirst() {
         self.cQueue.async(flags: .barrier) { [weak self] in self?.superRemoveFirst() }
     }
     
-    open override func removeLast() {
+    func _removeLast() {
         self.cQueue.async(flags: .barrier) { [weak self] in self?.superRemoveLast() }
     }
     
-    open override func remove(_ element: T) {
+    func _remove(_ element: T) {
         self.cQueue.async(flags: .barrier) { [weak self] in self?.superRemove(element) }
     }
     
-    open override func remove(at idx: Int) {
+    func _remove(at idx: Int) {
         self.cQueue.async(flags: .barrier) { [weak self] in self?.superRemove(at: idx) }
     }
     
-    // MARK: Open Reading Functions
-    open override func index(_ element: T) -> Int? {
+    // MARK: Private Reading Functions
+    func _index(_ element: T) -> Int? {
         var result: Int?
         self.cQueue.sync { [weak self] in
             result = self?.superIndex(element)
@@ -123,21 +217,19 @@ open class SynchronizedLinkedList<T: Equatable>: DoublyLinkedList<T> {
         return result
     }
     
-    open override subscript(idx: Int) -> T? {
-        get {
-            var result: T?
-            self.cQueue.sync { [weak self] in result = self?.superSubscript(idx: idx) }
-            return result
-        }
-        set {
-            guard let newValue = newValue else { return }
-            self.cQueue.async(flags: .barrier) { [weak self] in
-                self?.superSubscriptSet(idx: idx, newValue)
-            }
+    func _getSubscript(idx: Int) -> T? {
+        var result: T?
+        self.cQueue.sync { [weak self] in result = self?.superSubscript(idx: idx) }
+        return result
+    }
+    
+    func _setSubscript(idx: Int, _ element: T) {
+        self.cQueue.async(flags: .barrier) { [weak self] in
+            self?.superSubscriptSet(idx: idx, element)
         }
     }
     
-    open override func find(at idx: Int) -> T? {
+    func _find(at idx: Int) -> T? {
         var result: T?
         self.cQueue.sync { [weak self] in
             result = self?.superFind(at: idx)
@@ -145,20 +237,20 @@ open class SynchronizedLinkedList<T: Equatable>: DoublyLinkedList<T> {
         return result
     }
     
-    open override func forEach(reversed: Bool = false, _ body: ((T) -> Void)) {
+    func _forEach(reversed: Bool, _ body: ((T) -> Void)) {
         self.cQueue.sync { [weak self] in
             self?.superForEach(reversed: reversed, body)
         }
     }
     
-    open override func enumerateObjects(reversed: Bool = false, _ body: ((_ obj: T, _ idx: Int, _ stop: inout Bool) -> Void)) {
+    func _enumerateObjects(reversed: Bool, _ body: ((_ obj: T, _ idx: Int, _ stop: inout Bool) -> Void)) {
         
         self.cQueue.sync { [weak self] in self?.superEnumerateObjects(reversed: reversed, body)
         }
     }
 
-    open override func printAllKeys(reversed: Bool = false) {
-        self.cQueue.async { [weak self] in self?.superPrintAllKeys(reversed: reversed)
+    func _printAllKeys(reversed: Bool) {
+        self.cQueue.sync { [weak self] in self?.superPrintAllKeys(reversed: reversed)
         }
     }
 }
@@ -177,7 +269,7 @@ private extension SynchronizedLinkedList {
     
     func superIsEmpty() -> Bool { super.isEmpty }
     
-    func superDescription() -> String { return super.description }
+    func superDescription() -> String { super.description }
     
     func superAppend(_ elements: [T]) { super.append(elements) }
     
@@ -186,6 +278,8 @@ private extension SynchronizedLinkedList {
     func superPrepend(_ elements: [T]) { super.prepend(elements) }
     
     func superPrepend(_ element: T) { super.prepend(element) }
+    
+    func superReplace(at idx: Int, _ element: T) { super.replace(at: idx, element) }
     
     func superInsert(_ element: T, at idx: Int) { super.insert(element, at: idx) }
     
